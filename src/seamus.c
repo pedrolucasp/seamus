@@ -58,9 +58,11 @@ void fetch_mpd_status(struct mpd_connection *connection, char *str)
 		}
 
 		if (song != NULL) {
+			enum mpd_tag_type tag_artist = mpd_tag_name_iparse("Artist");
 			enum mpd_tag_type tag_title = mpd_tag_name_iparse("Title");
 
 			const char *title = mpd_song_get_tag(song, tag_title, 0);
+			const char *artist = mpd_song_get_tag(song, tag_artist, 0);
 
 			char *elapsed_time = (char*) malloc(13 * sizeof(char));
 
@@ -75,8 +77,9 @@ void fetch_mpd_status(struct mpd_connection *connection, char *str)
 					mpd_status_get_total_time(status) % 60);
 
 			// Move this into a proper struct
-			asprintf(str, "%s %s: %s/%s",
+			asprintf(str, "%s %s - %s: %s/%s",
 				state,
+				artist,
 				title,
 				elapsed_time,
 				total_time
