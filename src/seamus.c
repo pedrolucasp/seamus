@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 	}
 
 	main_window = tickit_window_new(root, (TickitRect){
-		.top = 8, .left = 2, .lines = 3,
+		.top = 2, .left = 2, .lines = tickit_window_lines(root) - 5,
 		.cols = tickit_window_cols(root) - 7
 	}, 0);
 
