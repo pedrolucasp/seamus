@@ -166,7 +166,7 @@ static int render(TickitWindow *win, TickitEventFlags flags, void *_info, void *
 		0);
 
 		tickit_renderbuffer_setpen(render_buffer, pen);
-		tickit_renderbuffer_text(render_buffer, "Hello!");
+		tickit_renderbuffer_text(render_buffer, "Hello, welcome to seamus");
 		tickit_renderbuffer_restore(render_buffer);
 	}
 
@@ -180,12 +180,12 @@ static int render(TickitWindow *win, TickitEventFlags flags, void *_info, void *
 	// XXX: Deal with pagination/offsetting?
 	fetch_mpd_current_queue(connection, queue, count);
 
-	tickit_renderbuffer_goto(render_buffer, 2, 0);
+	tickit_renderbuffer_goto(render_buffer, tickit_window_lines(win) - 2, 0);
 	tickit_renderbuffer_text(render_buffer, current_status);
 
 	int i;
 	for (i = 0; i < count; i++) {
-		tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+		tickit_renderbuffer_goto(render_buffer, 2 + i, 0);
 		tickit_renderbuffer_text(render_buffer, queue[i]);
 		free(queue[i]);
 	}
