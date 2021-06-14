@@ -32,6 +32,52 @@ static struct mpd_connection *setup_connection(void)
 	return connection;
 }
 
+void fetch_mpd_current_queue(struct mpd_connection *connection, char **list, int count) {
+	int queue_status = mpd_send_list_queue_meta(connection);
+
+	if (queue_status == true) {
+		struct mpd_entity *entity;
+		int index;
+
+		for (index = 0; index < count; index++) {
+			entity = mpd_recv_entity(connection);
+			if (entity != NULL) {
+				enum mpd_entity_type type = mpd_entity_get_type(entity);
+
+				if (type == MPD_ENTITY_TYPE_SONG) {
+					struct mpd_song *song = mpd_entity_get_song(entity);
+
+					enum mpd_tag_type tag_title = mpd_tag_name_iparse("Title");
+					const char *title = mpd_song_get_tag(song, tag_title, 0);
+
+					enum mpd_tag_type tag_artist = mpd_tag_name_iparse("AlbumArtist");
+					const char *artist = mpd_song_get_tag(song, tag_artist, 0);
+
+					// Allocate enough to store artist, song
+					// title and the dash between those two
+					char *song_info = malloc(sizeof(char) *
+							strlen(artist) +
+							strlen(title) + 4
+							);
+
+					sprintf(song_info, "%s - %s", artist, title);
+
+					list[index] = malloc(strlen(song_info) + 1);
+					strcpy(list[index], song_info);
+					free(song_info);
+				}
+
+				// When freeing the entity, it'll automatically
+				// free the song for us
+				mpd_entity_free(entity);
+			}
+		}
+
+	} else {
+		debug("Could not fetch queue");
+	}
+}
+
 void fetch_mpd_status(struct mpd_connection *connection, char *str)
 {
 	struct mpd_status *status = mpd_run_status(connection);
@@ -124,11 +170,28 @@ static int render(TickitWindow *win, TickitEventFlags flags, void *_info, void *
 		tickit_renderbuffer_restore(render_buffer);
 	}
 
+	// TODO: Connect this with the lines we can display to the user
+	int count = 9;
+
 	char *current_status;
+	char *queue[count];
 	fetch_mpd_status(connection, &current_status);
+
+	// XXX: Deal with pagination/offsetting?
+	fetch_mpd_current_queue(connection, queue, count);
 
 	tickit_renderbuffer_goto(render_buffer, 2, 0);
 	tickit_renderbuffer_text(render_buffer, current_status);
+
+	int i;
+	for (i = 0; i < count; i++) {
+		tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+		tickit_renderbuffer_text(render_buffer, queue[i]);
+		free(queue[i]);
+	}
+
+	free(current_status);
+	mpd_connection_free(connection);
 
 	return 1;
 }
