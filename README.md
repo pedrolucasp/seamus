@@ -2,6 +2,11 @@
 
 A simple and minimal music player. Uses mpd as backend.
 
+The name is from Pink Floyd's Seamus, it's almost pronounceable as cmus, which
+was the player I attempted to use when I got tired from using ncmpcpp, which
+besides being huge and having a bunch of things you'll never use it, it also had
+a terrible name.
+
 ## Dependencies
 
 - A POSIX-like system and a C11 compiler
@@ -9,7 +14,7 @@ A simple and minimal music player. Uses mpd as backend.
 - libmpdclient (and it's development headers)
 - [libtickit]
 
-## Hacking
+## Installing
 
 Install the dependencies. Note that for some systems, like Alpine Linux, the
 libtickit library is still under the `testing` repository, so you'll need to
@@ -21,7 +26,14 @@ $ ../configure
 $ make
 # make install
 ```
-Send patches to my [email] or on [GitHub].
+
+## Hacking
+
+Load some good playlist first, you'll need it. All debug info is logged to
+`stderr`, so you can do something like: `./seamus 2> log.txt` to check on info,
+and use the `debug(char *)` function to help you.
+
+Send patches to my [email] or create a pull request on [GitHub].
 
 ## License
 
