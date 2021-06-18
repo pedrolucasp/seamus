@@ -8,6 +8,7 @@ seamus() {
 	genrules seamus \
 		src/seamus.c \
 		src/log.c \
+		src/queue.c \
 		src/ui.c
 }
 
