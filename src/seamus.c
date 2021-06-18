@@ -25,6 +25,7 @@ setup_connection(struct seamus_frontend *s)
 	}
 
 	s->conn = connection;
+
 	return 0;
 }
 
@@ -131,38 +132,30 @@ main(int argc, char *argv[])
 {
 	struct seamus_frontend seamus = {0};
 
-	seamus_init(&seamus);
+	int r = seamus_init(&seamus);
+
+	if (r != 0) {
+		log_fatal("Couldn't initialize seamus");
+		return 1;
+	}
+
+	r = tickit_init(&seamus);
+
+	if (r != 0) {
+		log_fatal("Something went wrong when initializing tickit");
+		goto exit_tickit;
+	}
 
 	fetch_mpd_from_current_queue(&seamus, 10);
 
 	print_songs_from_queue(&seamus);
 
-	//return 0;
+exit_tickit:
+	tickit_finish(&seamus);
 
-	/*
-	t = tickit_new_stdtty();
+exit_mpd:
+	seamus_finish(&seamus);
 
-	TickitWindow *root = tickit_get_rootwin(t);
-
-	if (!root) {
-		fprintf(stderr, "Cannot create TickitTerm - %d\n", strerror(errno));
-		return 1;
-	}
-
-	main_window = tickit_window_new(root, (TickitRect){
-		.top = 2, .left = 2, .lines = tickit_window_lines(root) - 5,
-		.cols = tickit_window_cols(root) - 7
-	}, 0);
-
-	tickit_window_bind_event(main_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render, NULL);
-	tickit_window_bind_event(root, TICKIT_WINDOW_ON_EXPOSE, 0, &render_root, NULL);
-
-	// Initial update
-	tickit_watch_timer_after_msec(t, 1000, 0, &update, NULL);
-
-	tickit_run(t);
-	tickit_window_close(root);
-	tickit_unref(t);
+exit:
 	return 0;
-	*/
 }
