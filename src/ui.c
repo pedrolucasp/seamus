@@ -1,5 +1,7 @@
+#include <assert.h>
 #include <stdio.h>
 #include "ui.h"
+#include "queue.h"
 
 int
 tickit_init(struct seamus_frontend *s)
@@ -79,6 +81,36 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 		tickit_renderbuffer_setpen(render_buffer, pen);
 		tickit_renderbuffer_text(render_buffer, "Hello, welcome to seamus");
 		tickit_renderbuffer_restore(render_buffer);
+	}
+
+	int max_songs = tickit_window_lines(win) - 5;
+	log_debug("Max songs allowed: %d of total %d lines", max_songs, tickit_window_lines(win));
+
+	fetch_mpd_from_current_queue(seamus, max_songs);
+
+	if (seamus->queue_size > 0) {
+		for (size_t i = 0; i < seamus->queue_size; ++i) {
+			struct seamus_song *s = &seamus->queue[i];
+
+			if (s == NULL) {
+				log_info("Nothing here...");
+			} else {
+				char *song_str = malloc(
+						sizeof(char) *
+						(strlen(s->artist) + strlen(s->title) + 4));
+
+				sprintf(song_str, "%s - %s", s->artist, s->title);
+
+				tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+				tickit_renderbuffer_text(render_buffer, song_str);
+
+				log_debug("Song queued: %d: %s\n", i, song_str);
+				free(song_str);
+			}
+		}
+	} else {
+		tickit_renderbuffer_goto(render_buffer, 4, 0);
+		tickit_renderbuffer_text(render_buffer, "No songs queued.");
 	}
 
 	return 1;
