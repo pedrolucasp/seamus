@@ -6,7 +6,9 @@ eval ". $srcdir/config.sh"
 
 seamus() {
 	genrules seamus \
-		src/seamus.c
+		src/seamus.c \
+		src/log.c \
+		src/ui.c
 }
 
 all="seamus"

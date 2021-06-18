@@ -1,23 +1,9 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <tickit.h>
-#include <string.h>
-#include <assert.h>
-#include <mpd/client.h>
-
-struct seamus_song {
-	char *title;
-	char *artist;
-};
-
-struct seamus_frontend {
-	struct mpd_connection *conn;
-	struct seamus_song *queue;
-	size_t queue_size;
-	TickitWindow *main_window;
-	Tickit *t;
-};
+#include "seamus.h"
+#include "ui.h"
 
 int
 setup_connection(struct seamus_frontend *s)

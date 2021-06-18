@@ -113,6 +113,7 @@ run_configure() {
 	CFLAGS+=-Iinclude -I\$(OUTDIR)
 	CFLAGS+=-DPREFIX='"\$(PREFIX)"'
 	CFLAGS+=-DLIBDIR='"\$(LIBDIR)"'
+	CFLAGS+=-DLOG_USE_COLOR
 
 	all: ${all}
 	EOF
