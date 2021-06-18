@@ -9,7 +9,7 @@ tickit_init(struct seamus_frontend *s)
 	TickitWindow *root = tickit_get_rootwin(t);
 
 	if (!root) {
-		log_debug("Cannot create TickitTerm - %d\n", strerror(errno));
+		log_error("Cannot create TickitTerm - %d\n", strerror(errno));
 		return 1;
 	}
 
@@ -23,6 +23,65 @@ tickit_init(struct seamus_frontend *s)
 	s->main_window = main_window;
 
 	return 0;
+}
+
+int
+tickit_start(struct seamus_frontend *s)
+{
+
+	TickitWindow *root = tickit_get_rootwin(s->t);
+
+	tickit_window_bind_event(s->main_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_main_window, s);
+	tickit_window_bind_event(root, TICKIT_WINDOW_ON_EXPOSE, 0, &render_root, s);
+
+	tickit_run(s->t);
+}
+
+static int
+render_root(TickitWindow *win, TickitEventFlags flags, void *_info, void *data)
+{
+	log_info("Starting to render root window");
+
+	TickitExposeEventInfo *info = _info;
+	TickitRenderBuffer *render_buffer = info->rb;
+	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
+
+	int right = tickit_window_cols(win) - 1;
+	int bottom = tickit_window_lines(win) - 1;
+
+	tickit_renderbuffer_eraserect(render_buffer, &(TickitRect){
+		.top = 0, .left = 0, .lines = bottom+1, .cols = right+1,
+	});
+
+	return 1;
+}
+
+static int
+render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data)
+{
+	log_info("Starting the rendering of main window");
+
+	TickitExposeEventInfo *info = _info;
+	TickitRenderBuffer *render_buffer = info->rb;
+	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
+
+	tickit_renderbuffer_eraserect(render_buffer, &info->rect);
+
+	tickit_renderbuffer_goto(render_buffer, 0, 0);
+	{
+		tickit_renderbuffer_savepen(render_buffer);
+
+		TickitPen *pen = tickit_pen_new_attrs(
+			TICKIT_PEN_FG, 1,
+			TICKIT_PEN_BOLD, 1,
+		0);
+
+		tickit_renderbuffer_setpen(render_buffer, pen);
+		tickit_renderbuffer_text(render_buffer, "Hello, welcome to seamus");
+		tickit_renderbuffer_restore(render_buffer);
+	}
+
+	return 1;
 }
 
 int

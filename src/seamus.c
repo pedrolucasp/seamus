@@ -146,9 +146,11 @@ main(int argc, char *argv[])
 		goto exit_tickit;
 	}
 
-	fetch_mpd_from_current_queue(&seamus, 10);
+	tickit_start(&seamus);
 
-	print_songs_from_queue(&seamus);
+	//fetch_mpd_from_current_queue(&seamus, 10);
+
+	//print_songs_from_queue(&seamus);
 
 exit_tickit:
 	tickit_finish(&seamus);
