@@ -31,7 +31,7 @@ $ make
 
 Load some good playlist first, you'll need it. All debug info is logged to
 `stderr`, so you can do something like: `./seamus 2> log.txt` to check on info,
-and use the `debug(char *)` function to help you.
+and use the `log_*` function to help you.
 
 Send patches to my [email] or create a pull request on [GitHub].
 
