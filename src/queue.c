@@ -4,7 +4,7 @@
 #include "seamus.h"
 
 int
-fetch_mpd_from_current_queue(struct seamus_frontend *seamus, int max_count)
+fetch_current_queue(struct seamus_frontend *seamus, int max_count)
 {
 	assert(seamus->conn != NULL);
 

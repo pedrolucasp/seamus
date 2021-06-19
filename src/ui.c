@@ -140,7 +140,7 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 	int max_songs = tickit_window_lines(win) - 5;
 	log_debug("Max songs allowed: %d of total %d lines", max_songs, tickit_window_lines(win));
 
-	fetch_mpd_from_current_queue(seamus, max_songs);
+	fetch_current_queue(seamus, max_songs);
 
 	if (seamus->queue_size > 0) {
 		for (size_t i = 0; i < seamus->queue_size; ++i) {
