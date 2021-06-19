@@ -20,7 +20,7 @@ setup_connection(struct seamus_frontend *s)
 		const char *message = mpd_connection_get_error_message(connection);
 		mpd_connection_free(connection);
 
-		fprintf(stderr, "MPD connection error: %s\n", message);
+		log_error("MPD connection error: %s", message);
 		return 1;
 	}
 
@@ -52,8 +52,8 @@ seamus_init(struct seamus_frontend *s)
 	// Setup MPD connection
 	int mpd_con = setup_connection(s);
 	if (mpd_con != 0) {
-		// replace with a unified log
-		fprintf(stderr, "Weren't able to connect with MPD");
+		log_error("Weren't able to connect with MPD");
+
 		return 1;
 	}
 }
@@ -67,6 +67,7 @@ main(int argc, char *argv[])
 
 	if (r != 0) {
 		log_fatal("Couldn't initialize seamus");
+
 		return 1;
 	}
 
@@ -74,6 +75,7 @@ main(int argc, char *argv[])
 
 	if (r != 0) {
 		log_fatal("Something went wrong when initializing tickit");
+
 		goto exit_tickit;
 	}
 
