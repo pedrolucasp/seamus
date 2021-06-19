@@ -9,6 +9,7 @@ seamus() {
 		src/seamus.c \
 		src/log.c \
 		src/queue.c \
+		src/status.c \
 		src/ui.c
 }
 

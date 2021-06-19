@@ -10,5 +10,6 @@ int tickit_finish(struct seamus_frontend *s);
 
 
 static int render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data);
+static int render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data);
 static int render_root(TickitWindow *win, TickitEventFlags flags, void *_info, void *data);
 #endif

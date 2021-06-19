@@ -15,7 +15,9 @@ struct seamus_frontend {
 	struct mpd_connection *conn;
 	struct seamus_song *queue;
 	size_t queue_size;
+	char *current_status;
 	TickitWindow *main_window;
+	TickitWindow *status_window;
 	Tickit *t;
 };
 
