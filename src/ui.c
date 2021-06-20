@@ -73,6 +73,8 @@ render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, voi
 	TickitRenderBuffer *render_buffer = info->rb;
 	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
 
+	tickit_renderbuffer_eraserect(render_buffer, &info->rect);
+
 	int r = fetch_current_status(seamus);
 
 	if (r != 0) {
@@ -110,6 +112,8 @@ render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, voi
 			tickit_renderbuffer_restore(render_buffer);
 		}
 	}
+
+	return 1;
 }
 
 static int

@@ -44,6 +44,7 @@ seamus_finish(struct seamus_frontend *seamus)
 	}
 
 	free(seamus->queue);
+	free(seamus->current_status);
 }
 
 int
