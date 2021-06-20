@@ -132,7 +132,8 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 		tickit_renderbuffer_savepen(render_buffer);
 
 		TickitPen *pen = tickit_pen_new_attrs(
-			TICKIT_PEN_FG, 1,
+			TICKIT_PEN_FG, 0,
+			TICKIT_PEN_BG, 6,
 			TICKIT_PEN_BOLD, 1,
 		0);
 
