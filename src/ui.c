@@ -155,22 +155,23 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 
 	if (seamus->queue_size > 0) {
 		for (size_t i = 0; i < seamus->queue_size; ++i) {
-			struct seamus_song *s = &seamus->queue[i];
+			if (i < max_songs) {
+				struct seamus_song *s = &seamus->queue[i];
 
-			if (s == NULL) {
-				log_info("Nothing here...");
-			} else {
-				char *song_str = malloc(
-						sizeof(char) *
-						(strlen(s->artist) + strlen(s->title) + 4));
+				if (s == NULL) {
+					log_info("Nothing here...");
+				} else {
+					char *song_str = malloc(
+							sizeof(char) *
+							(strlen(s->artist) + strlen(s->title) + 4));
 
-				sprintf(song_str, "%s - %s", s->artist, s->title);
+					sprintf(song_str, "%s - %s", s->artist, s->title);
 
-				tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
-				tickit_renderbuffer_text(render_buffer, song_str);
+					tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+					tickit_renderbuffer_text(render_buffer, song_str);
 
-				log_debug("Song queued: %d: %s\n", i, song_str);
-				free(song_str);
+					free(song_str);
+				}
 			}
 		}
 	} else {
