@@ -19,12 +19,12 @@ tickit_init(struct seamus_frontend *s)
 	s->t = t;
 
 	TickitWindow *main_window = tickit_window_new(root, (TickitRect){
-		.top = 2, .left = 2, .lines = tickit_window_lines(root) - 5,
+		.top = 2, .left = 2, .lines = tickit_window_lines(root) - 6,
 		.cols = tickit_window_cols(root) - 2
 	}, 0);
 
 	TickitWindow *status_window = tickit_window_new(root, (TickitRect){
-		.top = tickit_window_lines(root) - 5, .left = 2, .lines = 5,
+		.top = tickit_window_lines(root) - 5 + 2, .left = 2, .lines = 5,
 		.cols = tickit_window_cols(root) - 2
 	}, 0);
 
@@ -80,7 +80,6 @@ render_root(TickitWindow *win, TickitEventFlags flags, void *_info, void *data)
 static int
 render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data)
 {
-	log_info("Bootstraping status window");
 	TickitExposeEventInfo *info = _info;
 	TickitRenderBuffer *render_buffer = info->rb;
 	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
@@ -107,9 +106,6 @@ render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, voi
 		}
 
 	} else {
-		log_debug("Should have returned %d", r);
-		log_debug("Status: %s", seamus->current_status);
-
 		tickit_renderbuffer_goto(render_buffer, 0, 0);
 		{
 			tickit_renderbuffer_savepen(render_buffer);
@@ -131,8 +127,6 @@ render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, voi
 static int
 render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data)
 {
-	log_info("Starting the rendering of main window");
-
 	TickitExposeEventInfo *info = _info;
 	TickitRenderBuffer *render_buffer = info->rb;
 	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
