@@ -31,11 +31,8 @@ fetch_current_status(struct seamus_frontend *s)
 		}
 
 		if (song != NULL) {
-			enum mpd_tag_type tag_artist = mpd_tag_name_iparse("Artist");
-			enum mpd_tag_type tag_title = mpd_tag_name_iparse("Title");
-
-			const char *title = mpd_song_get_tag(song, tag_title, 0);
-			const char *artist = mpd_song_get_tag(song, tag_artist, 0);
+			const char *title = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+			const char *artist = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
 
 			char *elapsed_time = (char*) malloc(13 * sizeof(char));
 
@@ -63,11 +60,12 @@ fetch_current_status(struct seamus_frontend *s)
 			);
 
 			char *str = malloc(strsz);
-			if (s->current_status == NULL) {
-				s->current_status = malloc(strsz);
-			} else {
+
+			if (s->current_status != NULL) {
 				free(s->current_status);
 			}
+
+			s->current_status = malloc(strsz);
 
 			sprintf(str, "%s %s - %s: %s/%s",
 				state,

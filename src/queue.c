@@ -26,11 +26,8 @@ fetch_current_queue(struct seamus_frontend *seamus, int max_count)
 				if (type == MPD_ENTITY_TYPE_SONG) {
 					struct mpd_song *song = mpd_entity_get_song(entity);
 
-					enum mpd_tag_type tag_title = mpd_tag_name_iparse("Title");
-					const char *stitle = mpd_song_get_tag(song, tag_title, 0);
-
-					enum mpd_tag_type tag_artist = mpd_tag_name_iparse("AlbumArtist");
-					const char *sartist = mpd_song_get_tag(song, tag_artist, 0);
+					const char *stitle = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
+					const char *sartist = mpd_song_get_tag(song, MPD_TAG_ALBUM_ARTIST, 0);
 
 					struct seamus_song *new = &seamus->queue[index];
 					memset(new, 0, sizeof(*new));
