@@ -83,10 +83,11 @@ fetch_current_status(struct seamus_frontend *s)
 			free(elapsed_time);
 			free(str);
 			mpd_song_free(song);
-
-			return 0;
 		}
 	}
 
 	mpd_status_free(status);
+	mpd_response_finish(s->conn);
+
+	return 0;
 }

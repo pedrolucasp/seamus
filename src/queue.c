@@ -52,9 +52,13 @@ fetch_current_queue(struct seamus_frontend *seamus, int max_count)
 			}
 		}
 
+		mpd_response_finish(seamus->conn);
+
 		return 0;
 	} else {
-		log_fatal("Couldn't fetch the queue");
+		const char *message = mpd_connection_get_error_message(seamus->conn);
+		log_error("MPD Error - Queue: %s", message);
+
 		return 1;
 	}
 }

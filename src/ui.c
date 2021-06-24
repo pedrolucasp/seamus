@@ -43,14 +43,26 @@ tickit_start(struct seamus_frontend *s)
 	tickit_window_bind_event(s->status_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_status_window, s);
 	tickit_window_bind_event(root, TICKIT_WINDOW_ON_EXPOSE, 0, &render_root, s);
 
+	// Kick initial update event
+	tickit_watch_timer_after_msec(s->t, 1000, 0, &update_status, s);
+
 	tickit_run(s->t);
+}
+
+static int
+update_status(Tickit *t, TickitEventFlags flags, void *_info, void *user)
+{
+	struct seamus_frontend *seamus = (struct seamus_frontend*) user;
+
+	tickit_window_expose(seamus->status_window, NULL);
+	tickit_watch_timer_after_msec(t, 1000, 0, &update_status, user);
+
+	return 0;
 }
 
 static int
 render_root(TickitWindow *win, TickitEventFlags flags, void *_info, void *data)
 {
-	log_info("Starting to render root window");
-
 	TickitExposeEventInfo *info = _info;
 	TickitRenderBuffer *render_buffer = info->rb;
 	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
