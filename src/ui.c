@@ -148,7 +148,7 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 		tickit_renderbuffer_restore(render_buffer);
 	}
 
-	int max_songs = tickit_window_lines(win) - 5;
+	int max_songs = tickit_window_lines(seamus->main_window);
 	log_debug("Max songs allowed: %d of total %d lines", max_songs, tickit_window_lines(win));
 
 	fetch_current_queue(seamus, max_songs);

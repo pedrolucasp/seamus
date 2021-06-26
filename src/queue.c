@@ -19,13 +19,11 @@ fetch_current_queue(struct seamus_frontend *seamus, int max_count)
 		for (index = 0; index < max_count; index++) {
 			entity = mpd_recv_entity(seamus->conn);
 			if (entity == NULL) {
-				if (mpd_connection_get_error(seamus->conn) != MPD_ERROR_SUCCESS) {
-					log_error("%s\n", mpd_connection_get_error_message(seamus->conn));
+				// TODO: Discover if the queue have ended, or we
+				// have received an error here
+				break;
 
-					return 1;
-				}
-
-				continue;
+				return 0;
 			} else {
 				enum mpd_entity_type type = mpd_entity_get_type(entity);
 
@@ -61,6 +59,8 @@ fetch_current_queue(struct seamus_frontend *seamus, int max_count)
 	} else {
 		const char *message = mpd_connection_get_error_message(seamus->conn);
 		log_error("MPD Error - Queue: %s", message);
+
+		mpd_response_finish(seamus->conn);
 
 		return 1;
 	}
