@@ -82,6 +82,14 @@ fetch_current_status(struct seamus_frontend *s)
 			free(str);
 			mpd_song_free(song);
 		}
+	} else {
+		const char *stat = "Stopped";
+
+		// This works like a charm, albeit it's ugly:
+		s->current_status = malloc(sizeof(char) * strlen(stat));
+		strcpy(s->current_status, stat);
+
+		return 0;
 	}
 
 	mpd_status_free(status);
