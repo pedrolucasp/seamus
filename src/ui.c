@@ -38,10 +38,13 @@ int
 tickit_start(struct seamus_frontend *s)
 {
 	TickitWindow *root = tickit_get_rootwin(s->t);
+	TickitTerm *tt = tickit_get_term(s->t);
 
 	tickit_window_bind_event(s->main_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_main_window, s);
 	tickit_window_bind_event(s->status_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_status_window, s);
 	tickit_window_bind_event(root, TICKIT_WINDOW_ON_EXPOSE, 0, &render_root, s);
+
+	tickit_term_bind_event(tt, TICKIT_TERM_ON_KEY, 0, &on_key_event, s);
 
 	// Kick initial update event
 	tickit_watch_timer_after_msec(s->t, 1000, 0, &update_status, s);
@@ -50,12 +53,54 @@ tickit_start(struct seamus_frontend *s)
 }
 
 static int
-update_status(Tickit *t, TickitEventFlags flags, void *_info, void *user)
+on_key_event(TickitTerm *tt, TickitEventFlags flags, void *_info, void *data)
 {
-	struct seamus_frontend *seamus = (struct seamus_frontend*) user;
+	TickitKeyEventInfo *info = _info;
+
+	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
+	const char *key_pressed = info->str;
+
+	if (strcmp(key_pressed, "q") == 0) {
+		tickit_window_close(seamus->main_window);
+		tickit_window_close(seamus->status_window);
+
+		tickit_stop(seamus->t);
+		//tickit_finish(seamus);
+
+	} else if (strcmp(key_pressed, "j") == 0) {
+		log_info("Scroll down");
+		// TODO: Replace with an enum
+		update_scroll_position(seamus, +1);
+	} else if (strcmp(key_pressed, "k") == 0) {
+		log_info("Scroll up");
+		// TODO: Replace with an enum
+		update_scroll_position(seamus, -1);
+	} else {
+		log_info("Pressed something else %s", key_pressed);
+	}
+
+	return 1;
+}
+
+static int
+update_scroll_position(struct seamus_frontend *seamus, int direction)
+{
+	if (seamus->scroll_position == 0 && direction == -1) {
+		return 0;
+	}
+
+	seamus->scroll_position += direction;
+	// TODO: Deal with the current window focused
+	tickit_window_scroll(seamus->main_window, direction, 0);
+}
+
+static int
+update_status(Tickit *t, TickitEventFlags flags, void *_info, void *data)
+{
+	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
 
 	tickit_window_expose(seamus->status_window, NULL);
-	tickit_watch_timer_after_msec(t, 1000, 0, &update_status, user);
+	tickit_watch_timer_after_msec(t, 1000, 0, &update_status, data);
 
 	return 0;
 }
