@@ -11,11 +11,30 @@ struct seamus_song {
 	char *artist;
 };
 
+struct seamus_status {
+	bool repeat;
+	bool random;
+	bool single;
+
+	int current_song_position;
+	int current_song_id;
+
+	int version;
+	int length;
+
+	unsigned elapsed_time;
+	unsigned total_time;
+
+	enum mpd_state state;
+	char *description;
+};
+
 struct seamus_frontend {
 	struct mpd_connection *conn;
 	struct seamus_song *queue;
 	size_t queue_size;
-	char *current_status;
+	struct seamus_status *status;
+	int scroll_position;
 	TickitWindow *main_window;
 	TickitWindow *status_window;
 	Tickit *t;
