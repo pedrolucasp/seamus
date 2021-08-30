@@ -161,7 +161,7 @@ render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, voi
 					0);
 
 			tickit_renderbuffer_setpen(render_buffer, pen);
-			tickit_renderbuffer_text(render_buffer, seamus->current_status);
+			tickit_renderbuffer_text(render_buffer, seamus->status->description);
 			tickit_renderbuffer_restore(render_buffer);
 		}
 	}
