@@ -7,6 +7,7 @@
 #include "log.h"
 
 struct seamus_song {
+	int song_id;
 	char *title;
 	char *artist;
 };
