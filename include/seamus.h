@@ -33,9 +33,12 @@ struct seamus_status {
 struct seamus_frontend {
 	struct mpd_connection *conn;
 	struct seamus_song *queue;
-	size_t queue_size;
 	struct seamus_status *status;
+
+	int version;
+	int queue_size;
 	int scroll_position;
+
 	TickitWindow *main_window;
 	TickitWindow *status_window;
 	Tickit *t;

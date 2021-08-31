@@ -14,4 +14,5 @@ static int update_status(Tickit *t, TickitEventFlags flags, void *_info, void *d
 static int render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data);
 static int render_status_window(TickitWindow *win, TickitEventFlags flags, void *_info, void *data);
 static int render_root(TickitWindow *win, TickitEventFlags flags, void *_info, void *data);
+static int render_queue(struct seamus_frontend *seamus, TickitRenderBuffer *render_buffer);
 #endif

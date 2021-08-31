@@ -40,8 +40,8 @@ tickit_start(struct seamus_frontend *s)
 	TickitWindow *root = tickit_get_rootwin(s->t);
 	TickitTerm *tt = tickit_get_term(s->t);
 
-	tickit_window_bind_event(s->main_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_main_window, s);
 	tickit_window_bind_event(s->status_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_status_window, s);
+	tickit_window_bind_event(s->main_window, TICKIT_WINDOW_ON_EXPOSE, 0, &render_main_window, s);
 	tickit_window_bind_event(root, TICKIT_WINDOW_ON_EXPOSE, 0, &render_root, s);
 
 	tickit_term_bind_event(tt, TICKIT_TERM_ON_KEY, 0, &on_key_event, s);
@@ -193,38 +193,50 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 		tickit_renderbuffer_restore(render_buffer);
 	}
 
-	int max_songs = tickit_window_lines(seamus->main_window);
-	log_debug("Max songs allowed: %d of total %d lines", max_songs, tickit_window_lines(win));
-
-	fetch_current_queue(seamus, max_songs);
-
-	if (seamus->queue_size > 0) {
-		for (size_t i = 0; i < seamus->queue_size; ++i) {
-			if (i < max_songs) {
-				struct seamus_song *s = &seamus->queue[i];
-
-				if (s == NULL) {
-					log_info("Nothing here...");
-				} else {
-					char *song_str = malloc(
-							sizeof(char) *
-							(strlen(s->artist) + strlen(s->title) + 4));
-
-					sprintf(song_str, "%s - %s", s->artist, s->title);
-
-					tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
-					tickit_renderbuffer_text(render_buffer, song_str);
-
-					free(song_str);
-				}
-			}
-		}
-	} else {
+	if (seamus->status->length == 0) {
 		tickit_renderbuffer_goto(render_buffer, 4, 0);
 		tickit_renderbuffer_text(render_buffer, "No songs queued.");
+	} else {
+		if (seamus->status->version != seamus->version) {
+			// Update the current version rendered
+			seamus->version = seamus->status->version;
+
+			render_queue(seamus, render_buffer);
+		}
 	}
 
 	return 1;
+}
+
+static int
+render_queue(struct seamus_frontend *seamus, TickitRenderBuffer *render_buffer)
+{
+	int max_window_size = tickit_window_lines(seamus->main_window);
+	fetch_current_queue(seamus, max_window_size);
+
+	for (size_t i = 0; i < seamus->queue_size; ++i) {
+		struct seamus_song *song = &seamus->queue[i];
+
+		if (song == NULL) {
+			log_info("Nothing to see here...");
+		} else {
+			char *song_str = malloc(
+					sizeof(char) *
+					(strlen(song->artist) + strlen(song->title) + 6));
+
+			if (seamus->status->current_song_id == song->song_id) {
+				sprintf(song_str, "%s - %s", song->artist, song->title);
+				tickit_renderbuffer_goto(render_buffer, 4 + i, 2);
+			} else {
+				sprintf(song_str, "%s - %s", song->artist, song->title);
+				tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+			}
+
+			tickit_renderbuffer_text(render_buffer, song_str);
+
+			free(song_str);
+		}
+	}
 }
 
 int
