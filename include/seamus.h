@@ -42,6 +42,9 @@ struct seamus_frontend {
 	TickitWindow *main_window;
 	TickitWindow *status_window;
 	Tickit *t;
+
+	TickitPen *scrolling_pen;
+	TickitPen *playing_pen;
 };
 
 int seamus_init(struct seamus_frontend *s);

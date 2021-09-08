@@ -28,6 +28,17 @@ tickit_init(struct seamus_frontend *s)
 		.cols = tickit_window_cols(root) - 2
 	}, 0);
 
+	s->scrolling_pen = tickit_pen_new_attrs(
+		TICKIT_PEN_BG, 3,
+		TICKIT_PEN_FG, 0,
+		0
+	);
+
+	s->playing_pen = tickit_pen_new_attrs(
+		TICKIT_PEN_BOLD, 1,
+		0
+	);
+
 	s->main_window = main_window;
 	s->status_window = status_window;
 
@@ -48,6 +59,7 @@ tickit_start(struct seamus_frontend *s)
 
 	// Kick initial update event
 	tickit_watch_timer_after_msec(s->t, 1000, 0, &update_status, s);
+	//tickit_watch_timer_after_msec(s->t, 1000, 0, &update_main_window, s);
 
 	tickit_run(s->t);
 }
@@ -85,7 +97,16 @@ on_key_event(TickitTerm *tt, TickitEventFlags flags, void *_info, void *data)
 static int
 update_scroll_position(struct seamus_frontend *seamus, int direction)
 {
+	log_info("Current position %d, direction: %d, length: %d", seamus->scroll_position, direction, seamus->status->length);
+
 	if (seamus->scroll_position == 0 && direction == -1) {
+		return 0;
+	}
+
+	// Can't go further than whats queued
+	// TODO: This will cause problems when dealing with the library
+	// scrolling
+	if (seamus->scroll_position == seamus->status->length - 1 && direction == 1) {
 		return 0;
 	}
 
@@ -101,6 +122,17 @@ update_status(Tickit *t, TickitEventFlags flags, void *_info, void *data)
 
 	tickit_window_expose(seamus->status_window, NULL);
 	tickit_watch_timer_after_msec(t, 1000, 0, &update_status, data);
+
+	return 0;
+}
+
+static int
+update_main_window(Tickit *t, TickitEventFlags flags, void *_info, void *data)
+{
+	struct seamus_frontend *seamus = (struct seamus_frontend*) data;
+
+	tickit_window_expose(seamus->main_window, NULL);
+	tickit_watch_timer_after_msec(t, 1000, 0, &update_main_window, data);
 
 	return 0;
 }
@@ -197,12 +229,22 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 		tickit_renderbuffer_goto(render_buffer, 4, 0);
 		tickit_renderbuffer_text(render_buffer, "No songs queued.");
 	} else {
+		log_info("There are items on queue");
 		if (seamus->status->version != seamus->version) {
+			log_info(
+				"The current rendered version is %d and there's a new one %d",
+				seamus->version,
+				seamus->status->version
+			);
+
 			// Update the current version rendered
 			seamus->version = seamus->status->version;
-
-			render_queue(seamus, render_buffer);
+			int max_window_size = tickit_window_lines(seamus->main_window);
+			fetch_current_queue(seamus, max_window_size);
 		}
+
+		log_info("Rendering queue again");
+		render_queue(seamus, render_buffer);
 	}
 
 	return 1;
@@ -211,28 +253,61 @@ render_main_window(TickitWindow *win, TickitEventFlags flags, void *_info, void 
 static int
 render_queue(struct seamus_frontend *seamus, TickitRenderBuffer *render_buffer)
 {
-	int max_window_size = tickit_window_lines(seamus->main_window);
-	fetch_current_queue(seamus, max_window_size);
-
 	for (size_t i = 0; i < seamus->queue_size; ++i) {
 		struct seamus_song *song = &seamus->queue[i];
 
 		if (song == NULL) {
 			log_info("Nothing to see here...");
 		} else {
+			int left_padding = 0;
 			char *song_str = malloc(
 					sizeof(char) *
 					(strlen(song->artist) + strlen(song->title) + 6));
 
+			sprintf(song_str, "%s - %s", song->artist, song->title);
+
 			if (seamus->status->current_song_id == song->song_id) {
-				sprintf(song_str, "%s - %s", song->artist, song->title);
-				tickit_renderbuffer_goto(render_buffer, 4 + i, 2);
-			} else {
-				sprintf(song_str, "%s - %s", song->artist, song->title);
-				tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+				left_padding = 2;
 			}
 
-			tickit_renderbuffer_text(render_buffer, song_str);
+			tickit_renderbuffer_goto(render_buffer, 4 + i, left_padding);
+			if (seamus->status->current_song_id == song->song_id && seamus->scroll_position == i) {
+				tickit_renderbuffer_savepen(render_buffer);
+				TickitPen *scrolling_playing_pen = tickit_pen_clone(seamus->scrolling_pen);
+				tickit_pen_copy_attr(scrolling_playing_pen, seamus->playing_pen, TICKIT_PEN_BOLD);
+
+				tickit_renderbuffer_setpen(render_buffer, scrolling_playing_pen);
+				tickit_renderbuffer_text(render_buffer, song_str);
+				tickit_renderbuffer_restore(render_buffer);
+			} else if (seamus->status->current_song_id == song->song_id) {
+				tickit_renderbuffer_savepen(render_buffer);
+				tickit_renderbuffer_setpen(render_buffer, seamus->playing_pen);
+				tickit_renderbuffer_text(render_buffer, song_str);
+				tickit_renderbuffer_restore(render_buffer);
+			} else if (seamus->scroll_position == i) {
+				tickit_renderbuffer_savepen(render_buffer);
+				tickit_renderbuffer_setpen(render_buffer, seamus->scrolling_pen);
+				tickit_renderbuffer_text(render_buffer, song_str);
+				tickit_renderbuffer_restore(render_buffer);
+			} else {
+				tickit_renderbuffer_text(render_buffer, song_str);
+			}
+
+
+
+		//	if (seamus->status->current_song_id == song->song_id) {
+		//		tickit_renderbuffer_goto(render_buffer, 4 + i, 2);
+		//		{
+		//			tickit_renderbuffer_savepen(render_buffer);
+
+		//			tickit_renderbuffer_setpen(render_buffer, seamus->playing_pen);
+		//			tickit_renderbuffer_text(render_buffer, song_str);
+		//			tickit_renderbuffer_restore(render_buffer);
+		//		}
+		//	} else {
+		//		tickit_renderbuffer_goto(render_buffer, 4 + i, 0);
+		//		tickit_renderbuffer_text(render_buffer, song_str);
+		//	}
 
 			free(song_str);
 		}
