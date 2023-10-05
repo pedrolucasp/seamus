@@ -26,7 +26,7 @@ distclean: clean
 install: all
 	mkdir -p \
 		$(DESTDIR)$(BINDIR) \
-		$(DESTDIR)$(SHAREDIR)/seamus \
-	install -Dm755 seamus $(DESTDIR)$(BINDIR)/seamus
+		$(DESTDIR)$(SHAREDIR)/seamus
+	install -m755 seamus $(DESTDIR)$(BINDIR)/seamus
 
 .PHONY: clean distclean install
